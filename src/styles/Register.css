@@ -1,0 +1,229 @@
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url("../assets/bg.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+}
+
+:root {
+  --primary: #99a5c7;
+  --color: #1d4ed8;
+}
+
+header {
+  text-align: center;
+  margin-top: 60px;
+  margin-bottom: 15px;
+}
+
+header > img {
+  width: 276px;
+  height: 104px;
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+main > div {
+  background-color: white;
+  padding: 15px;
+  border-radius: 7px;
+  width: 400px;
+  padding: 30px 50px;
+  margin-bottom: 70px;
+}
+
+.progress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.step {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.active {
+  background-color: var(--color);
+  color: white;
+}
+
+.strip {
+  height: 1px;
+  background-color: var(--primary);
+  border-radius: 1px;
+}
+
+.small {
+  width: 6px;
+}
+
+.medium {
+  width: 10px;
+}
+
+.large {
+  width: 14px;
+}
+
+.connector {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.label {
+  font-size: 12px;
+  margin-top: 4px;
+  color: var(--primary);
+}
+
+.on {
+  color: #43454d;
+}
+
+.step-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+form > div > input {
+  width: 350px;
+  height: 40px;
+  margin: 15px 0px;
+  background-color: #f6f7ffba;
+  border: 1px solid #d5d7e0ba;
+  border-radius: 5px;
+  padding: 5px 15px;
+}
+
+form > input {
+  text-align: left;
+}
+
+.pass {
+  position: relative;
+}
+
+.checkbox-line {
+  display: flex;
+  align-items: center;
+  color: #1f1f20ba;
+  gap: 6px;
+  margin: 5px 0px;
+}
+
+.checkbox-line input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color);
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  background-color: var(--color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 15px;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.question {
+  color: #1f1f20ba;
+  text-align: center;
+}
+
+a {
+  color: #1d4ed8;
+}
+
+.connect {
+  margin: 15px 0px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 1px;
+  color: var(--primary);
+}
+.normal {
+  width: 100%;
+}
+
+div > img {
+  height: 13px;
+  width: 13px;
+}
+
+.social-login {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 30px;
+}
+
+.social-option {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 13px;
+  width: 50%;
+  border-radius: 3px;
+  box-shadow: 1px 2px 5px 2px rgb(243, 236, 236);
+  gap: 10px;
+  color: var(--primary);
+}
+
+.social-option img {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+}
+
+.errorText {
+  color: red;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+#email,
+#pwd {
+  margin-bottom: 5px;
+}
+
+@media screen and (max-width: 768px) {
+  main > div {
+    margin: 0 10px;
+    width: 370px;
+  }
+}
