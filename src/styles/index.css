@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+:root {
+  --font-mulish: "Mulish", sans-serif;
+  --font--inter: "Inter", sans-serif;
+  --color--primary: #1d4ed8;
+  --color--secundery: #99a5c7;
+}
+
+@layer utilities {
+  .bg-overlay-img {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+      url("../assets/bg.png");
+  }
+}
