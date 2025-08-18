@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 
 .env
+
+nginx
+ssh_acces_container
+ssh_acces_container.pub
