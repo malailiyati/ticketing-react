@@ -4,8 +4,6 @@ import "../styles/index.css";
 import { Link, useNavigate } from "react-router";
 import eyeSolid from "../assets/eye-solid-full (2).svg";
 import eyeSlash from "../assets/eye-slash-regular-full.svg";
-// import { login } from "../../redux/slices/authSlice";
-// import { useDispatch } from "react-redux";
 import { authContext } from "../context/auth/authContext";
 
 function Register() {
