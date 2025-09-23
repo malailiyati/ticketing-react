@@ -22,7 +22,7 @@ function Register() {
 
   const eyeHandler = () => setShowPassword((prev) => !prev);
 
-  const submitHandler = (event) => {
+  const submitHandler = async (event) => {
     event.preventDefault();
     const { email, password } = form;
 
@@ -54,7 +54,7 @@ function Register() {
     if (!valid) return;
 
     // panggil context register
-    const res = register(email, password);
+    const res = await register(email, password);
     if (!res.success) {
       setError(res.message);
       return;

@@ -26,7 +26,7 @@ function ForgotPwd() {
     }
   }, [navigate]);
 
-  const submitHandler = (event) => {
+  const submitHandler = async (event) => {
     event.preventDefault();
     const { email } = form;
 
@@ -44,16 +44,6 @@ function ForgotPwd() {
     }
     setErr(newErr);
     if (!valid) return;
-
-    // Ambil data user dari localStorage hasil register
-    // const storedUserStr = localStorage.getItem("userLogin");
-    // if (!storedUserStr) {
-    //   setError("Belum ada user terdaftar, silakan daftar terlebih dahulu.");
-    //   return;
-    // }
-    // const storedUser = JSON.parse(storedUserStr);
-
-    // const user = storedUser.find((u) => u.email === email);
 
     if (!users) {
       setError("Belum ada user terdaftar, silakan daftar terlebih dahulu.");

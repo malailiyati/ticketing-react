@@ -8,6 +8,9 @@ RUN npm ci
 
 COPY . .
 
+ARG VITE_BE_HOST
+ENV VITE_BE_HOST=$VITE_BE_HOST
+
 RUN npm run build
 
 FROM nginx:stable-bookworm

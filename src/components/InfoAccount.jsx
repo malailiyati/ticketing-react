@@ -1,9 +1,31 @@
-import React from "react";
-import profilePic from "../assets/profile.png";
-import { useSelector } from "react-redux";
+import React, { useRef } from "react";
+import defaultPic from "../assets/profile.png";
+import { useSelector, useDispatch } from "react-redux";
+import { updateProfileThunk } from "../../redux/slices/authSlice";
 
 function InfoAccount() {
   const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const fileInputRef = useRef(null);
+
+  const profilePictureUrl = user?.profilePicture
+    ? `${import.meta.env.VITE_BE_HOST}${user.profilePicture}`
+    : defaultPic;
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("profilePictureFile", file);
+
+    formData.append("firstName", user.firstName || "");
+    formData.append("lastName", user.lastName || "");
+    formData.append("phone", user.phone || "");
+    formData.append("email", user.email || "");
+
+    dispatch(updateProfileThunk(formData));
+  };
   return (
     <section className="info-account">
       <div className="bg-white rounded-4xl py-[30px] px-[40px]">
@@ -33,17 +55,35 @@ function InfoAccount() {
           </div>
           <div>
             <div className="flex justify-center items-center">
-              <img
-                className="w-[150px] h-[150px] rounded-full object-cover m-[50px]"
-                src={profilePic}
-                alt="profile picture"
-              />
+              <div className="relative w-[150px] h-[150px] m-10">
+                <img
+                  className="w-full h-full rounded-full object-cover"
+                  src={profilePictureUrl}
+                  alt="profile picture"
+                />
+                {/* Tombol plus kecil */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current.click()}
+                  className="absolute bottom-2 right-2 bg-[var(--color--primary)] text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-500"
+                >
+                  +
+                </button>
+                {/* Hidden input file */}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                />
+              </div>
             </div>
             <div className="text-center">
-              <p className="font-bold text-xl">
+              <p className="font-semibold text-xl">
                 {user.firstName} {user.lastName}
               </p>
-              <p className="font-bold text-sm mb-[30px]">Moviegoers</p>
+              <p className="font-semibold text-sm mb-[30px]">Moviegoers</p>
             </div>
           </div>
         </div>
@@ -82,8 +122,8 @@ function InfoAccount() {
                     y2="49.7227"
                     gradientUnits="userSpaceOnUse"
                   >
-                    <stop stop-color="#FFF6DC" />
-                    <stop offset="1" stop-color="#FFC107" />
+                    <stop stopColor="#FFF6DC" />
+                    <stop offset="1" stopColor="#FFC107" />
                   </linearGradient>
                   <clipPath id="clip0_47_9753">
                     <rect
@@ -100,7 +140,7 @@ function InfoAccount() {
             </div>
           </div>
 
-          <label className="text-base" for="points">
+          <label className="text-base" htmlFor="points">
             180 points become a master
           </label>
           <br />

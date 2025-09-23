@@ -10,19 +10,25 @@ import useMoviesList from "../hooks/MoviesList";
 function Home() {
   const scrollRef = useRef(null);
   const {
-    movies: movies4,
-    loading: loading4,
-    error: error4,
-  } = useMoviesList({ limit: 4 });
+    movies: moviesPopular,
+    loading: loadingPopular,
+    error: errorPopular,
+  } = useMoviesList({ limit: 4, endpoint: "/movie/popular" });
   const {
-    movies: movies6,
-    loading: loading6,
-    error: error6,
-  } = useMoviesList({ limit: 6 });
-  if (loading4 || loading6) return <p>Loading...</p>;
-  if (error4) return <p>{error4.message}</p>;
-  if (error6) return <p>{error6.message}</p>;
+    movies: moviesUpcoming,
+    loading: loadingUpcoming,
+    error: errorUpcoming,
+  } = useMoviesList({ limit: 6, endpoint: "/movie/upcoming" });
 
+  const getPosterUrl = (poster) => {
+    if (!poster) return "https://via.placeholder.com/300x450?text=No+Image";
+
+    if (poster.startsWith("http")) {
+      return poster; // URL dari TMDB
+    }
+
+    return `${import.meta.env.VITE_BE_HOST}/img/${poster}`; // path dari backend local
+  };
   // scroll kiri dan kanan
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -40,7 +46,7 @@ function Home() {
       <section>
         <div className="flex flex-col gap-17 md:flex-row justify-between items-center mx-[70px] mt-40 mb-30 md:my-[200px]">
           <div className="text-center md:text-start">
-            <h1 className="text-[var(--color--primary)] font-700 text-[30px]">
+            <h1 className="text-[var(--color--primary)] font-semibold text-[30px]">
               MOVIE TICKET PURCHASES #1 IN INDONESIA
             </h1>
             <p className="text-[48px] leading-[70px] py-[10px]">
@@ -50,7 +56,8 @@ function Home() {
               Sign up and get the ticket with a lot of discount
             </p>
           </div>
-          <div className="grid w-[300px] h-[350px] md:h-[250px] grid-cols-2 grid-rows-[37%_26%_37%] gap-[5px] overflow-hidden rounded-[7px]">
+          {/* <div className="grid w-[450px] h-[10px] md:h-[250px] grid-cols-2 grid-rows-3 gap-[5px] overflow-hidden rounded-[7px]"> */}
+          <div className="grid w-[350px] h-[350px] md:h-[300px] md:w-[450px] grid-cols-2 grid-rows-3 gap-[5px] overflow-hidden rounded-[7px]">
             {/* A */}
             <img
               src={movie1}
@@ -84,8 +91,8 @@ function Home() {
 
       {/* Benefits Section */}
       <section className="text-center md:text-start md:flex-row">
-        <div className="p-[70px]">
-          <h2 className="text-[var(--color--primary)] mb-[20px] font-700 text-[25px]">
+        <div className="px-[70px] py-[20px]">
+          <h2 className="text-[var(--color--primary)] mb-[10px] font-semibold text-[25px]">
             WHY CHOOSE US
           </h2>
           <p className="text-[32px] leading-[40px] tracking-[1px]">
@@ -94,8 +101,9 @@ function Home() {
           </p>
           <div className="my-[50px] flex flex-col justify-between items-center md:flex-row gap-[50px]">
             <div className="md:max-w-[250px]">
-              <div className="inline-block  bg-[#eeefff] w-[70px] h-[70px] p-[22px] flex items-center justify-center rounded-full mb-3">
+              <div className="inline-block  bg-[#eeefff] w-[75px] h-[75px] p-[22px] flex items-center justify-center rounded-full mb-3">
                 <svg
+                  className="w-8 h-8"
                   width="18"
                   height="20"
                   viewBox="0 0 18 20"
@@ -110,17 +118,18 @@ function Home() {
                   />
                 </svg>
               </div>
-              <h2 className="my-[40px] mb-[30px] text-[18px] font-semibold">
+              <h2 className="my-[40px] mb-[30px] text-[19px] font-semibold">
                 Guaranteed
               </h2>
-              <p className="text-[14px] leading-[20px] text-[var(--color--secundery)]">
+              <p className="text-[15px] leading-[20px] text-[var(--color--secundery)]">
                 Lorem ipsum dolor sit amet, consectetur adipis elit. Sit enim
                 nec, proin faucibus nibh et sagittis a. Lacinia purus ac amet.
               </p>
             </div>
             <div className="md:max-w-[250px]">
-              <div className="inline-block bg-[#eeefff] w-[70px] h-[70px] p-[22px] flex items-center justify-center rounded-full mb-3">
+              <div className="inline-block bg-[#eeefff] w-[75px] h-[75px] p-[22px] flex items-center justify-center rounded-full mb-3">
                 <svg
+                  className="w-8 h-8"
                   width="22"
                   height="21"
                   viewBox="0 0 22 21"
@@ -148,17 +157,18 @@ function Home() {
                 </svg>
               </div>
 
-              <h2 className="my-[40px] mb-[30px] text-[18px] font-semibold">
+              <h2 className="my-[40px] mb-[30px] text-[19px] font-semibold">
                 Affordable
               </h2>
-              <p className="text-[14px] leading-[20px] text-[var(--color--secundery)]">
+              <p className="text-[15px] leading-[20px] text-[var(--color--secundery)]">
                 Lorem ipsum dolor sit amet, consectetur adipis elit. Sit enim
                 nec, proin faucibus nibh et sagittis a. Lacinia purus ac amet.
               </p>
             </div>
             <div className="md:max-w-[250px]">
-              <div className="inline-block bg-[#eeefff] w-[70px] h-[70px] p-[22px] flex items-center justify-center rounded-full mb-3">
+              <div className="inline-block bg-[#eeefff] w-[75px] h-[75px] p-[22px] flex items-center justify-center rounded-full mb-3">
                 <svg
+                  className="w-8 h-8"
                   width="26"
                   height="23"
                   viewBox="0 0 26 23"
@@ -172,10 +182,10 @@ function Home() {
                 </svg>
               </div>
 
-              <h2 className="my-[40px] mb-[30px] text-[18px] font-semibold">
+              <h2 className="my-[40px] mb-[30px] text-[19px] font-semibold">
                 24/7 Customer Support
               </h2>
-              <p className="text-[14px] leading-[20px] text-[var(--color--secundery)]">
+              <p className="text-[15px] leading-[20px] text-[var(--color--secundery)]">
                 Lorem ipsum dolor sit amet, consectetur adipis elit. Sit enim
                 nec, proin faucibus nibh et sagittis a. Lacinia purus ac amet.
               </p>
@@ -187,28 +197,27 @@ function Home() {
       {/* Movie Section */}
       <section className="py-12 px-6 bg-white">
         <div className="p-[70px]">
-          <h2 className="text-[var(--color--primary)] mb-[20px] font-700 text-[25px] text-center">
+          <h2 className="text-[var(--color--primary)] mb-[10px] font-semibold text-[25px] text-center">
             MOVIES
           </h2>
           <p className="text-[32px] leading-[40px] tracking-[1px] text-center">
             Exciting Movies That Should <br /> Be Watched Today
           </p>
 
-          <section className="mt-10 flex gap-6 md:overflow-x-none overflow-x-scroll">
-            {loading4 && <p>Loading...</p>}
-            {error4 && <p>{error4.message}</p>}
-            {!loading4 &&
-              !error4 &&
-              movies4.map((movie) => (
+          <section className="mt-10 flex gap-6 overflow-x-scroll">
+            {loadingPopular && <p>Loading popular...</p>}
+            {errorPopular && <p>Gagal load popular movies</p>}
+            {!loadingPopular &&
+              !errorPopular &&
+              moviesPopular.map((movie) => (
+                // {moviesPopular.map((movie) => (
                 <div
                   key={movie.id}
-                  className="bg-white min-w-[250px] rounded-[12px] shadow-[0_0_10px_rgba(0,0,0,0.1)] overflow-hidden"
+                  className="group bg-white min-w-[250px] rounded-[12px] shadow-[0_0_10px_rgba(0,0,0,0.1)] overflow-hidden"
                 >
                   <div className="relative">
                     <img
-                      src={`${import.meta.env.VITE_PREFIX_IMAGE}${
-                        movie.poster_path
-                      }`}
+                      src={getPosterUrl(movie.poster)}
                       alt={movie.title}
                       className="w-full min-h-[350px] object-cover rounded-[8px]"
                     />
@@ -283,7 +292,7 @@ function Home() {
       <section className="py-12 px-6 bg-white">
         <div className="p-[70px] flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-[var(--color--primary)] mb-[20px] font-700 text-[25px]">
+            <h2 className="text-[var(--color--primary)] mb-[10px] font-semibold text-[25px]">
               UPCOMING MOVIES
             </h2>
             <p className="text-[32px] leading-[40px] tracking-[1px]">
@@ -315,51 +324,54 @@ function Home() {
           className="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar px-6 mx-10"
           style={{ scrollBehavior: "smooth" }}
         >
-          {movies6.map((movie) => (
-            <div
-              key={movie.id}
-              className="bg-white min-w-[250px] rounded-[12px] shadow-[0_0_10px_rgba(0,0,0,0.1)] overflow-hidden"
-            >
-              <div className="relative">
-                <img
-                  src={`${import.meta.env.VITE_PREFIX_IMAGE}${
-                    movie.poster_path
-                  }`}
-                  alt={movie.title}
-                  className="w-full min-h-[350px] object-cover rounded-[8px]"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out rounded-[8px]">
-                  <Link
-                    to={`/ticketing/movies/${movie.id}`}
-                    className="min-w-[180px] py-3 text-sm text-white text-center border border-white bg-white/10 rounded-[6px] hover:bg-white/30"
-                  >
-                    Details
-                  </Link>
-                  <Link
-                    to="#"
-                    className="min-w-[180px] py-3 text-sm text-white text-center bg-[var(--color)] rounded-[6px] hover:bg-[#163899]"
-                  >
-                    Ticket
-                  </Link>
+          {loadingUpcoming && <p>Loading upcoming...</p>}
+          {errorUpcoming && <p>Gagal load upcoming movies</p>}
+          {!loadingUpcoming &&
+            !errorUpcoming &&
+            moviesUpcoming.map((movie) => (
+              // {moviesUpcoming.map((movie) => (
+              <div
+                key={movie.id}
+                className="group bg-white min-w-[250px] rounded-[12px] shadow-[0_0_10px_rgba(0,0,0,0.1)] overflow-hidden"
+              >
+                <div className="relative">
+                  <img
+                    src={getPosterUrl(movie.poster)}
+                    alt={movie.title}
+                    className="w-full min-h-[350px] object-cover rounded-[8px]"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out rounded-[8px]">
+                    <Link
+                      to={`/ticketing/movies/${movie.id}`}
+                      className="min-w-[180px] py-3 text-sm text-white text-center border border-white bg-white/10 rounded-[6px] hover:bg-white/30"
+                    >
+                      Details
+                    </Link>
+                    <Link
+                      to="#"
+                      className="min-w-[180px] py-3 text-sm text-white text-center bg-[var(--color)] rounded-[6px] hover:bg-[#163899]"
+                    >
+                      Ticket
+                    </Link>
+                  </div>
+                </div>
+                <Link to={`/ticketing/movies/${movie.id}`}>
+                  <h3 className="text-xl font-semibold mt-3 mx-[10px] hover:text-blue-600">
+                    {movie.title}
+                  </h3>
+                </Link>
+                <div className="flex flex-wrap mx-[10px] gap-2 mt-2 mb-4">
+                  {movie.genres.map((genre, idx) => (
+                    <span
+                      key={idx}
+                      className="text-[var(--colortwo)] bg-[#a0a3bd1a] px-4 py-2 rounded-[30px] text-sm"
+                    >
+                      {genre}
+                    </span>
+                  ))}
                 </div>
               </div>
-              <Link to={`/ticketing/movies/${movie.id}`}>
-                <h3 className="text-xl font-semibold mt-3 mx-[10px] hover:text-blue-600">
-                  {movie.title}
-                </h3>
-              </Link>
-              <div className="flex flex-wrap mx-[10px] gap-2 mt-2 mb-4">
-                {movie.genres.map((genre, idx) => (
-                  <span
-                    key={idx}
-                    className="text-[var(--colortwo)] bg-[#a0a3bd1a] px-4 py-2 rounded-[30px] text-sm"
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
+            ))}
         </section>
       </section>
     </>

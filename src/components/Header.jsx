@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import profileImg from "../assets/profile.png";
+import defaultPic from "../assets/profile.png";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/slices/authSlice";
 import { Link } from "react-router";
@@ -10,13 +10,18 @@ function Header() {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  // const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const { isLoggedIn, user } = useSelector((state) => state.auth);
 
   const handleLogout = () => {
     dispatch(logout());
     setMobileMenuOpen(false);
     setDropdownVisible(false);
   };
+
+  const profilePictureUrl = user?.profilePicture
+    ? `${import.meta.env.VITE_BE_HOST}${user.profilePicture}`
+    : defaultPic;
 
   return (
     <>
@@ -103,7 +108,7 @@ function Header() {
                 Sign In
               </NavLink>
               <NavLink
-                to="/"
+                to="/register"
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
               >
                 Sign Up
@@ -124,11 +129,11 @@ function Header() {
 
               <div className="relative">
                 <img
-                  src={profileImg}
+                  src={profilePictureUrl}
                   alt="Profile"
                   className="w-10 h-10 rounded-full cursor-pointer object-cover"
                   onClick={() => setDropdownVisible((v) => !v)}
-                  onError={(e) => (e.target.src = "/default-profile.png")}
+                  onError={(e) => (e.target.src = defaultPic)}
                 />
                 {dropdownVisible && (
                   <div className="absolute right-0 mt-7 w-40 bg-white border border-gray-200 rounded-[7px] shadow-md z-20">
@@ -208,7 +213,7 @@ function Header() {
                   Sign In
                 </NavLink>
                 <NavLink
-                  to="/"
+                  to="/register"
                   className="w-full text-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                   onClick={() => setMobileMenuOpen(false)}
                 >

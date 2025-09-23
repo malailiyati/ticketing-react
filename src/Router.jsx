@@ -4,6 +4,7 @@ import {
   Route,
   Outlet,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 
 import Movies from "./pages/Movies.jsx";
@@ -24,13 +25,16 @@ import ForgotPwd from "./pages/ForgotPwd.jsx";
 import ResetPwd from "./pages/ResetPwd.jsx";
 import MovieAdmin from "./pages/MovieAdmin.jsx";
 import AddMovie from "./pages/AddMovie.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import AdminRoute from "./components/AdminRoute.jsx";
 
 function Router() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="">
-          <Route index element={<Register />} />
+          <Route index element={<Navigate to="/ticketing/content" replace />} />
+          <Route path="register" element={<Register />} />
           <Route path="login" element={<Login />} />
           <Route path="forgotpwd" element={<ForgotPwd />} />
           <Route path="resetPwd" element={<ResetPwd />} />
@@ -39,15 +43,71 @@ function Router() {
             <Route path="movies">
               <Route index element={<Movies />} />
               <Route path=":movieId" element={<MovieDetail />} />
-              <Route path=":movieId/order" element={<OrderPage />} />
-              <Route path="payment" element={<Payment />} />
-              <Route path="ticket" element={<TicketResult />} />
+              <Route
+                path=":movieId/order"
+                element={
+                  <ProtectedRoute>
+                    <OrderPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="payment"
+                element={
+                  <ProtectedRoute>
+                    <Payment />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="ticket"
+                element={
+                  <ProtectedRoute>
+                    <TicketResult />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
-            <Route path="accountSetting" element={<AccountForm />} />
-            <Route path="orderHistory" element={<OrderHistory />} />
-            <Route path="admin" element={<Admin />} />
-            <Route path="movieAdmin" element={<MovieAdmin />} />
-            <Route path="addMovie" element={<AddMovie />} />
+            <Route
+              path="accountSetting"
+              element={
+                <ProtectedRoute>
+                  <AccountForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="orderHistory"
+              element={
+                <ProtectedRoute>
+                  <OrderHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="admin"
+              element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="movieAdmin"
+              element={
+                <AdminRoute>
+                  <MovieAdmin />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="addMovie"
+              element={
+                <AdminRoute>
+                  <AddMovie />
+                </AdminRoute>
+              }
+            />
           </Route>
         </Route>
       </Routes>

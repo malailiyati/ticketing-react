@@ -15,35 +15,22 @@ function Login() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // const [_, setCurrentUser] = useLocalStorage("currentUser", null);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/ticketing/content");
+    }
+  }, [navigate]);
 
-  // useEffect(() => {
-  //   if (!currentUser?.email) return;
-  //   dispatch(login(currentUser));
-  //   // navigate("/ticketing/content");
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [currentUser]);
   const onChangeHandler = (event) => {
     const { name, value } = event.target;
     setForm((form) => ({ ...form, [name]: value }));
   };
 
-  // validasi localStorage
-  useEffect(() => {
-    const userData = localStorage.getItem("userLogin");
-    if (userData) {
-      // navigate("/");
-    }
-  }, [navigate]);
+  const eyeHandler = () => setShowPassword((prev) => !prev);
 
-  const eyeHandler = () => {
-    setShowPassword((prev) => !prev);
-  };
-  const submitHandler = (event) => {
+  const submitHandler = async (event) => {
     event.preventDefault();
-    // const form = event.target;
-    // const email = form.email.value.trim();
-    // const password = form.password.value.trim();
     const { email, password } = form;
 
     let valid = true;
@@ -72,39 +59,46 @@ function Login() {
     setErr(newErr);
     if (!valid) return;
 
-    // Ambil data user dari localStorage hasil register
-    const storedUserStr = localStorage.getItem("userLogin");
-    if (!storedUserStr) {
-      setError("Belum ada user terdaftar, silakan daftar terlebih dahulu.");
-      return;
-    }
-    const storedUser = JSON.parse(storedUserStr);
+    try {
+      // Fetch ke backend
+      const res = await fetch(`${import.meta.env.VITE_BE_HOST}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const user = storedUser.find((u) => u.email === email);
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Login gagal");
+      }
 
-    if (!user) {
-      setError("Email tidak ditemukan, silakan cek kembali atau daftar baru.");
-      return;
-    }
+      const data = await res.json();
 
-    if (user.password !== password) {
-      setError("Password salah, silakan coba lagi.");
-      return;
-    }
+      // token langsung ada di root
+      const token = data.token;
 
-    // Kalau sampai sini berarti email dan password cocok
-    // navigate("/ticketing/content");
+      if (!token) {
+        throw new Error("Token tidak ditemukan di response backend");
+      }
 
-    if (valid) {
-      // const inputData = {
-      //   email,
-      //   password,
-      // };
-      // localStorage.setItem("userLogin", JSON.stringify(inputData));
-      dispatch(login(user));
-      // setCurrentUser(user);
+      // simpan token ke localStorage
+      localStorage.setItem("token", token);
+
+      // simpan ke redux
+      dispatch(
+        login({
+          token,
+          user: {
+            email,
+            role: data.role, // dari form input
+          },
+        })
+      );
+
+      // redirect
       navigate("/ticketing/content");
-      // dispatch(login({ email }));
+    } catch (err) {
+      setError(err.message);
     }
   };
   return (

@@ -1,30 +1,40 @@
 import React, { useState } from "react";
-import MoviesList from "../hooks/MoviesList";
 import { Link } from "react-router";
 import useMoviesList from "../hooks/MoviesList";
 
 function Movies() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState(null);
+  const [selectedGenres, setSelectedGenres] = useState([]);
   const totalPages = 4;
   const { movies, genres, loading, error } = useMoviesList({
     page,
-    limit: 20,
-    search: searchTerm,
-    genre: selectedGenre,
+    limit: 12,
+    title: searchTerm,
+    genre: selectedGenres,
+    endpoint: "/movie",
   });
 
   // Handler untuk klik filter genre
-  const toggleGenre = (e) => {
-    if (selectedGenre === e) {
-      setSelectedGenre(null); // kalau sama, berarti unselect
-    } else {
-      setSelectedGenre(e);
-    }
-    setPage(1); // reset page ke 1 saat filter berubah
+  const toggleGenre = (genreName) => {
+    setSelectedGenres((prev) => {
+      if (prev.includes(genreName)) {
+        return prev.filter((g) => g !== genreName);
+      } else {
+        return [...prev, genreName];
+      }
+    });
+    setPage(1);
   };
+  const getPosterUrl = (poster) => {
+    if (!poster) return "https://via.placeholder.com/300x450?text=No+Image";
 
+    if (poster.startsWith("http")) {
+      return poster; // URL dari TMDB
+    }
+
+    return `${import.meta.env.VITE_BE_HOST}/img/${poster}`; // path dari backend local
+  };
   // Handler untuk input search
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -69,13 +79,13 @@ function Movies() {
         {/* Filter Genres */}
         <h3 className="text-xl font-bold mb-2">Filter</h3>
         <section className="flex gap-2 flex-wrap mb-8">
-          {genres.size > 0 &&
-            Array.from(genres.entries()).map(([e, genreName]) => (
+          {genres.length > 0 &&
+            genres.map((genreName, idx) => (
               <p
-                key={e}
-                onClick={() => toggleGenre(e)}
+                key={idx}
+                onClick={() => toggleGenre(genreName)}
                 className={`cursor-pointer px-4 py-2 rounded-[30px] text-sm ${
-                  selectedGenre === e
+                  selectedGenres.includes(genreName)
                     ? "bg-blue-600 text-white"
                     : "bg-[#a0a3bd1a] text-[var(--colortwo)]"
                 }`}
@@ -98,9 +108,7 @@ function Movies() {
               >
                 <div className="relative group">
                   <img
-                    src={`${import.meta.env.VITE_PREFIX_IMAGE}${
-                      movie.poster_path
-                    }`}
+                    src={getPosterUrl(movie.poster)}
                     alt={movie.title}
                     className="w-full min-h-[350px] object-cover rounded-[8px]"
                   />
