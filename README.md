@@ -1,12 +1,58 @@
-# React + Vite
+# 🎬 Tickitz Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend untuk aplikasi **Tickitz – Movie Ticketing Web App**, sebuah platform pemesanan tiket bioskop secara online.  
+User dapat melihat film yang sedang tayang & akan datang, memilih jadwal, menentukan kursi, hingga melakukan pembayaran langsung dari aplikasi web.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🔧 Tech Stack
 
-## Expanding the ESLint configuration
+- [React](https://react.dev/) – Library UI
+- [Tailwind CSS](https://tailwindcss.com/) – Styling
+- [Redux Toolkit](https://redux-toolkit.js.org/) – State Management
+- [Vite](https://vitejs.dev/) – Build Tool
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🌱 Environment
+
+```env
+VITE_BE_HOST=<backend_url>
+VITE_ENVIRONMENT=<development or production>
+
+```
+
+## Instalation
+
+1. Clone repo
+
+```
+git clone https://github.com/malailiyati/ticketing-react.git
+cd tickitz-frontend
+```
+
+2.Install dependencies
+
+```
+npm install
+```
+
+3.Jalankan development server
+
+```
+npm run dev
+```
+
+## License
+
+MIT License
+Copyright (c) 2025 Tickitz
+
+# Contact Info
+
+Author: Ma'la Iliyati
+Email: malailiyati107@gmail.com
+
+# Related Project
+
+Tickitz
