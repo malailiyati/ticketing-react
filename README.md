@@ -45,13 +45,13 @@ npm run dev
 
 ## License
 
-MIT License
-Copyright (c) 2025 Tickitz
+- MIT License
+- Copyright (c) 2025 Tickitz
 
 # Contact Info
 
-Author: Ma'la Iliyati
-Email: malailiyati107@gmail.com
+- Author: Ma'la Iliyati
+- Email: malailiyati107@gmail.com
 
 # Related Project
 
