@@ -15,6 +15,8 @@ RUN npm run build
 
 FROM nginx:stable-bookworm
 
+RUN rm /etc/nginx/conf.d/default.conf
+
 COPY --from=builder /app/nginx/nginx.conf /etc/nginx/
 COPY --from=builder /app/nginx/sites-available/app.conf /etc/nginx/sites-available/
 COPY --from=builder /app/nginx/includes/proxy.conf /etc/nginx/includes/proxy.conf
