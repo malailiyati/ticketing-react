@@ -14,6 +14,10 @@ const initialState = {
   moviePoster: "",
   movieTitle: "",
   movieGenre: "",
+  scheduleId: null,
+  seatMap: {},
+  cinemaName: null,
+  cinemaPrice: 0,
 };
 const orderSlice = createSlice({
   initialState,
@@ -26,7 +30,9 @@ const orderSlice = createSlice({
       } else {
         state.selectedSeats.push(seat);
       }
-      state.totalPrice = state.selectedSeats.length * state.ticketPrice;
+
+      // total price pakai harga cinema yang dipilih
+      state.totalPrice = state.selectedSeats.length * (state.cinemaPrice || 0);
     },
     resetOrder: (state) => {
       state.selectedSeats = [];
@@ -59,6 +65,22 @@ const orderSlice = createSlice({
     setMovieGenre: (state, action) => {
       state.movieGenre = action.payload;
     },
+    setScheduleId: (state, action) => {
+      state.scheduleId = action.payload;
+    },
+    setCinema: (state, action) => {
+      state.cinemaName = action.payload.name; // action kirim object {name, price}
+      state.cinemaPrice = action.payload.price;
+    },
+    setScheduleTime: (state, action) => {
+      state.selectedTime = action.payload;
+    },
+    setScheduleDate: (state, action) => {
+      state.selectedDate = action.payload;
+    },
+    setSeatMap: (state, action) => {
+      state.seatMap = action.payload;
+    },
     clearDataMovie: (state) => {
       state.selectedSeats = [];
       state.totalPrice = 0;
@@ -88,6 +110,11 @@ export const {
   setMoviePoster,
   setMovieTitle,
   setMovieGenre,
+  setScheduleId,
+  setCinema,
+  setScheduleDate,
+  setScheduleTime,
+  setSeatMap,
   clearDataMovie,
 } = orderSlice.actions;
 export default orderSlice.reducer;
