@@ -106,7 +106,7 @@ function TicketResult() {
           <div>
             <dl className="flex justify-between items-center border-1 border-[var(--color--secundery)] rounded-xl py-3 px-5 mx-10 my-5">
               <dt>Total</dt>
-              <dd>${totalPrice}</dd>
+              <dd> Rp {totalPrice.toLocaleString("id-ID")}</dd>
             </dl>
           </div>
           <div>
