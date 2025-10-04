@@ -9,6 +9,8 @@ import {
   resetPasswordStatus,
   resetProfileStatus,
 } from "../../redux/slices/authSlice";
+import eyeSolid from "../assets/eye-solid-full (2).svg";
+import eyeSlash from "../assets/eye-slash-regular-full.svg";
 
 function AccountForm() {
   const dispatch = useDispatch();
@@ -32,9 +34,19 @@ function AccountForm() {
   const [formPassword, setFormPassword] = useState({
     newPassword: "",
     oldPassword: "",
+    confirmPassword: "",
   });
   const [err, setErr] = useState({ newPassword: "", confirmPassword: "" });
-  // const [error, setError] = useState("");
+  // state buat toggle password
+  const [showOldPwd, setShowOldPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+
+  const toggleShow = (field) => {
+    if (field === "old") setShowOldPwd((prev) => !prev);
+    if (field === "new") setShowNewPwd((prev) => !prev);
+    if (field === "confirm") setShowConfirmPwd((prev) => !prev);
+  };
 
   useEffect(() => {
     dispatch(getProfileThunk());
@@ -116,9 +128,9 @@ function AccountForm() {
   const submitPassword = (e) => {
     e.preventDefault();
 
-    const { newPassword, oldPassword } = formPassword;
+    const { newPassword, oldPassword, confirmPassword } = formPassword;
     let valid = true;
-    const newErr = { newPassword: "" };
+    const newErr = { newPassword: "", confirmPassword: "" };
 
     // validasi password
     const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/;
@@ -128,6 +140,12 @@ function AccountForm() {
     } else if (!passwordPattern.test(newPassword)) {
       newErr.newPassword =
         "Password minimal 8 karakter, mengandung huruf besar, huruf kecil, dan karakter spesial";
+      valid = false;
+    }
+
+    if (confirmPassword !== newPassword) {
+      newErr.confirmPassword =
+        "Konfirmasi password tidak sama dengan password baru";
       valid = false;
     }
 
@@ -189,12 +207,13 @@ function AccountForm() {
                     <div>
                       <label htmlFor="email">E-mail</label> <br />
                       <input
-                        className="border border-gray-300 rounded-md w-full pl-4"
+                        className="border border-gray-300 rounded-md w-full pl-4 bg-gray-100"
                         type="text"
                         id="email"
                         name="newEmail"
                         value={formProfile.newEmail}
                         onChange={onChangeProfile}
+                        disabled
                       />
                     </div>
 
@@ -202,13 +221,14 @@ function AccountForm() {
                       <label htmlFor="phone-number">Phone Number</label>
                       <br />
                       <div className="flex border border-gray-300 rounded-md w-full pl-4">
-                        <span className="code-country">+62 |</span>
+                        <span className="code-country">+62 | </span>
                         <input
                           type="tel"
                           id="phone-number"
                           name="phone"
                           value={formProfile.phone}
                           onChange={onChangeProfile}
+                          className="pl-2"
                         />
                       </div>
                     </div>
@@ -233,44 +253,80 @@ function AccountForm() {
               <p className="border-b border-[var(--color--secundery)]">
                 Account and Privacy
               </p>
-              <div className="flex gap-[40px]">
-                <div className="w-full">
-                  <label htmlFor="confirmpwd">Old Password</label>
-                  <br />
-                  <input
-                    className="border border-gray-300 rounded-md w-full pl-4"
-                    type="password"
-                    name="oldPassword"
-                    id="confirmpwd"
-                    placeholder="Write your old password"
-                    value={formPassword.oldPassword}
-                    onChange={onChangePassword}
-                  />
-                </div>
 
-                <div className="w-full">
-                  <label htmlFor="pwd">New Password</label>
-                  <br />
-                  <input
-                    className="border border-gray-300 rounded-md w-full pl-4"
-                    type="password"
-                    name="newPassword"
-                    id="pwd"
-                    placeholder="Write your password"
-                    value={formPassword.newPassword}
-                    onChange={onChangePassword}
-                  />
-                </div>
+              {/* Old Password */}
+              <div className="w-full relative mb-4">
+                <label htmlFor="oldpwd">Old Password</label>
+                <input
+                  className="border border-gray-300 rounded-md w-full pl-4 pr-10"
+                  type={showOldPwd ? "text" : "password"}
+                  name="oldPassword"
+                  id="oldpwd"
+                  placeholder="Write your old password"
+                  value={formPassword.oldPassword}
+                  onChange={onChangePassword}
+                />
+                <img
+                  src={showOldPwd ? eyeSolid : eyeSlash}
+                  alt="toggle"
+                  className="absolute right-5 top-16 cursor-pointer w-5"
+                  onClick={() => toggleShow("old")}
+                />
               </div>
-              {err.newPassword && (
-                <p style={{ color: "red" }}>{err.newPassword}</p>
-              )}
+
+              {/* New Password */}
+              <div className="w-full relative mb-4">
+                <label htmlFor="newpwd">New Password</label>
+                <input
+                  className="border border-gray-300 rounded-md w-full pl-4 pr-10"
+                  type={showNewPwd ? "text" : "password"}
+                  name="newPassword"
+                  id="newpwd"
+                  placeholder="Write your new password"
+                  value={formPassword.newPassword}
+                  onChange={onChangePassword}
+                />
+                <img
+                  src={showNewPwd ? eyeSolid : eyeSlash}
+                  alt="toggle"
+                  className="absolute right-5 top-16 cursor-pointer w-5"
+                  onClick={() => toggleShow("new")}
+                />
+                {err.newPassword && (
+                  <p className="text-red-500">{err.newPassword}</p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div className="w-full relative mb-4">
+                <label htmlFor="confirmpwd">Confirm Password</label>
+                <input
+                  className="border border-gray-300 rounded-md w-full pl-4 pr-10"
+                  type={showConfirmPwd ? "text" : "password"}
+                  name="confirmPassword"
+                  id="confirmpwd"
+                  placeholder="Confirm your new password"
+                  value={formPassword.confirmPassword}
+                  onChange={onChangePassword}
+                />
+                <img
+                  src={showConfirmPwd ? eyeSolid : eyeSlash}
+                  alt="toggle"
+                  className="absolute right-5 top-16 cursor-pointer w-5"
+                  onClick={() => toggleShow("confirm")}
+                />
+                {err.confirmPassword && (
+                  <p className="text-red-500">{err.confirmPassword}</p>
+                )}
+              </div>
+
               {/* Pesan sukses / error dari backend */}
               {passwordMessage && (
-                <p style={{ color: "green" }}>{passwordMessage}</p>
+                <p className="text-green-500">{passwordMessage}</p>
               )}
-              {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
+              {passwordError && <p className="text-red-500">{passwordError}</p>}
             </div>
+
             <button
               type="submit"
               className="py-[15px] px-[70px] [background-color:var(--color--primary)] text-white text-center rounded-[7px]"
