@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import defaultPic from "../assets/profile.png";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,12 +9,19 @@ function Header() {
   const dispatch = useDispatch();
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   // const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const { isLoggedIn, user } = useSelector((state) => state.auth);
 
+  // Ambil role dari Redux atau localStorage
+  const role = user?.role || localStorage.getItem("role");
+  const isAdmin = role === "admin";
+
   const handleLogout = () => {
     dispatch(logout());
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
     setMobileMenuOpen(false);
     setDropdownVisible(false);
   };
@@ -23,6 +30,15 @@ function Header() {
     ? `${import.meta.env.VITE_BE_HOST}${user.profilePicture}`
     : defaultPic;
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownVisible(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   return (
     <>
       <header className="fixed top-0 left-0 w-full bg-white shadow z-[999]">
@@ -52,36 +68,65 @@ function Header() {
           {/* Nav desktop */}
           <nav className="hidden md:flex flex-1 justify-center items-center">
             <div className="flex items-center space-x-6">
-              <NavLink
-                to="/ticketing/content"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-blue-600 font-semibold"
-                    : "hover:text-blue-600"
-                }
-              >
-                Home
-              </NavLink>
-              <NavLink
-                to="/ticketing/movies"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-blue-600 font-semibold"
-                    : "hover:text-blue-600"
-                }
-              >
-                Movie
-              </NavLink>
-              <NavLink
-                to="/buy-ticket"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-blue-600 font-semibold"
-                    : "hover:text-blue-600"
-                }
-              >
-                Buy Ticket
-              </NavLink>
+              {isAdmin ? (
+                // Menu untuk Admin
+                <>
+                  <NavLink
+                    to="/ticketing/admin"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-600 font-semibold"
+                        : "hover:text-blue-600"
+                    }
+                  >
+                    Dashboard
+                  </NavLink>
+                  <NavLink
+                    to="/ticketing/movieAdmin"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-600 font-semibold"
+                        : "hover:text-blue-600"
+                    }
+                  >
+                    Movies
+                  </NavLink>
+                </>
+              ) : (
+                // Menu untuk User
+                <>
+                  <NavLink
+                    to="/ticketing/content"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-600 font-semibold"
+                        : "hover:text-blue-600"
+                    }
+                  >
+                    Home
+                  </NavLink>
+                  <NavLink
+                    to="/ticketing/movies"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-600 font-semibold"
+                        : "hover:text-blue-600"
+                    }
+                  >
+                    Movie
+                  </NavLink>
+                  <NavLink
+                    to="/buy-ticket"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-600 font-semibold"
+                        : "hover:text-blue-600"
+                    }
+                  >
+                    Buy Ticket
+                  </NavLink>
+                </>
+              )}
             </div>
           </nav>
 
@@ -116,7 +161,7 @@ function Header() {
             </div>
           ) : (
             <div className="hidden md:flex flex-shrink-0 items-center gap-4 relative">
-              <select
+              {/* <select
                 name="location"
                 id="location"
                 className="border border-gray-300 rounded px-3 py-1 text-sm"
@@ -125,9 +170,9 @@ function Header() {
                 <option value="jkt">Jakarta</option>
                 <option value="bgr">Bogor</option>
                 <option value="bnd">Bandung</option>
-              </select>
+              </select> */}
 
-              <div className="relative">
+              <div className="relative" ref={dropdownRef}>
                 <img
                   src={profilePictureUrl}
                   alt="Profile"
@@ -137,18 +182,22 @@ function Header() {
                 />
                 {dropdownVisible && (
                   <div className="absolute right-0 mt-7 w-40 bg-white border border-gray-200 rounded-[7px] shadow-md z-20">
-                    <Link
-                      to="/ticketing/accountSetting"
-                      className="block w-full px-4 py-2 text-left hover:bg-gray-100 border-b border-gray-400"
-                    >
-                      Account Setting
-                    </Link>
-                    <Link
-                      to="/ticketing/orderHistory"
-                      className="block w-full px-4 py-2 text-left hover:bg-gray-100 border-b border-gray-400"
-                    >
-                      Order History
-                    </Link>
+                    {!isAdmin && (
+                      <>
+                        <Link
+                          to="/ticketing/accountSetting"
+                          className="block w-full px-4 py-2 text-left hover:bg-gray-100 border-b border-gray-400"
+                        >
+                          Account Setting
+                        </Link>
+                        <Link
+                          to="/ticketing/orderHistory"
+                          className="block w-full px-4 py-2 text-left hover:bg-gray-100 border-b border-gray-400"
+                        >
+                          Order History
+                        </Link>
+                      </>
+                    )}
                     <button
                       className="block w-full px-4 py-2 text-left hover:bg-gray-100"
                       onClick={handleLogout}
@@ -167,39 +216,68 @@ function Header() {
           <div className="md:hidden bg-white border-t border-gray-200 px-6 py-4 flex flex-col items-center gap-4">
             {/* Nav mobile */}
             <nav className="flex flex-col w-full items-center space-y-3">
-              <NavLink
-                to="/ticketing/content"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-blue-600 font-semibold"
-                    : "hover:text-blue-600"
-                }
-                onClick={() => setMobileMenuOpen(false)} // otomatis tutup menu saat klik nav
-              >
-                Home
-              </NavLink>
-              <NavLink
-                to="/ticketing/movies"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-blue-600 font-semibold"
-                    : "hover:text-blue-600"
-                }
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Movie
-              </NavLink>
-              <NavLink
-                to="/buy-ticket"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-blue-600 font-semibold"
-                    : "hover:text-blue-600"
-                }
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Buy Ticket
-              </NavLink>
+              {isAdmin ? (
+                <>
+                  <NavLink
+                    to="/ticketing/admin"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-600 font-semibold"
+                        : "hover:text-blue-600"
+                    }
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </NavLink>
+                  <NavLink
+                    to="/ticketing/movieAdmin"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-600 font-semibold"
+                        : "hover:text-blue-600"
+                    }
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Movies
+                  </NavLink>
+                </>
+              ) : (
+                <>
+                  <NavLink
+                    to="/ticketing/content"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-600 font-semibold"
+                        : "hover:text-blue-600"
+                    }
+                    onClick={() => setMobileMenuOpen(false)} // otomatis tutup menu saat klik nav
+                  >
+                    Home
+                  </NavLink>
+                  <NavLink
+                    to="/ticketing/movies"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-600 font-semibold"
+                        : "hover:text-blue-600"
+                    }
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Movie
+                  </NavLink>
+                  <NavLink
+                    to="/buy-ticket"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-600 font-semibold"
+                        : "hover:text-blue-600"
+                    }
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Buy Ticket
+                  </NavLink>
+                </>
+              )}
             </nav>
 
             {/* Auth mobile */}
@@ -222,19 +300,23 @@ function Header() {
               </>
             ) : (
               <>
-                <Link
-                  to="/ticketing/accountSetting"
-                  className="hover:text-blue-600"
-                >
-                  Account Setting
-                </Link>
-                <Link
-                  to="/ticketing/orderHistory"
-                  className="hover:text-blue-600"
-                >
-                  Order History
-                </Link>
-                <select
+                {!isAdmin && (
+                  <>
+                    <Link
+                      to="/ticketing/accountSetting"
+                      className="hover:text-blue-600"
+                    >
+                      Account Setting
+                    </Link>
+                    <Link
+                      to="/ticketing/orderHistory"
+                      className="hover:text-blue-600"
+                    >
+                      Order History
+                    </Link>
+                  </>
+                )}
+                {/* <select
                   name="location"
                   id="location"
                   className="w-full border border-gray-300 rounded px-3 py-1 text-sm"
@@ -243,7 +325,7 @@ function Header() {
                   <option value="jkt">Jakarta</option>
                   <option value="bgr">Bogor</option>
                   <option value="bnd">Bandung</option>
-                </select>
+                </select> */}
 
                 <button
                   className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
