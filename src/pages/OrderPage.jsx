@@ -1,12 +1,12 @@
-// import React, { useState } from "react";
-// import spidermanposter from "../assets/spidermen.png";
-import cinema from "../assets/Vector.svg";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleSeat } from "../../redux/slices/orderSlice";
+import { toggleSeat, setSeatMap } from "../../redux/slices/orderSlice";
+import { useEffect, useState } from "react";
+import { cinemaLogos } from "../constants/CinemaLogos";
 
 function OrderPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {
     selectedSeats,
     totalPrice,
@@ -15,39 +15,84 @@ function OrderPage() {
     moviePoster,
     movieTitle,
     movieGenre,
+    scheduleId,
+    cinemaName,
+    cinemaPrice,
   } = useSelector((state) => state.order);
 
+  // const rows = ["A", "B", "C", "D", "E", "F", "G"];
   const rows = ["A", "B", "C", "D", "E", "F", "G"];
   const leftCols = [1, 2, 3, 4, 5, 6, 7];
   const rightCols = [8, 9, 10, 11, 12, 13, 14];
   // const [selectedSeats, setSelectedSeats] = useState([]);
 
-  // const handleClick = (seatId) => {
-  //   setSelectedSeats(
-  //     (prev) =>
-  //       prev.includes(seatId)
-  //         ? prev.filter((s) => s !== seatId) // batal
-  //         : [...prev, seatId] // pilih
-  //   );
-  // };
+  const [soldSeats, setSoldSeats] = useState([]);
+  useEffect(() => {
+    if (!scheduleId) {
+      navigate("/ticketing/movies");
+    }
+  }, [scheduleId, navigate]);
 
+  //  Fetch kursi sold dari BE
+  useEffect(() => {
+    const fetchSoldSeats = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_BE_HOST}/seats?schedule_id=${scheduleId}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch sold seats");
+
+        const data = await res.json();
+
+        if (data && Array.isArray(data.data)) {
+          setSoldSeats(data.data.map((s) => s.seat_number));
+
+          // Buat mapping seat_number -> id
+          const mapping = {};
+          data.data.forEach((seat) => {
+            mapping[seat.seat_number] = seat.id;
+          });
+          setSeatMap(mapping);
+          dispatch(setSeatMap(mapping));
+        } else {
+          setSoldSeats([]);
+          setSeatMap({});
+        }
+        // eslint-disable-next-line no-unused-vars
+      } catch (err) {
+        setSoldSeats([]);
+        setSeatMap({});
+      }
+    };
+
+    if (scheduleId) fetchSoldSeats();
+  }, [scheduleId, dispatch]);
+
+  //  Render kursi (bedakan available/selected/sold)
   const renderSeatGrid = (cols) => {
     return (
       <div className="flex flex-col items-center">
-        {/* Kursi */}
         <div className="grid grid-rows-7 gap-2">
           {rows.map((row) => (
             <div key={row} className="grid grid-cols-7 gap-2">
               {cols.map((col) => {
                 const seatId = `${row}${col}`;
                 const isSelected = selectedSeats.includes(seatId);
+                const isSold = soldSeats.includes(seatId);
+
                 return (
                   <div
                     key={seatId}
-                    onClick={() => dispatch(toggleSeat(seatId))}
+                    onClick={() => {
+                      if (!isSold) {
+                        dispatch(toggleSeat(seatId));
+                      }
+                    }}
                     className={`w-8 h-8 rounded cursor-pointer flex items-center justify-center text-sm
                       ${
-                        isSelected
+                        isSold
+                          ? "bg-[#6e7191] cursor-not-allowed"
+                          : isSelected
                           ? "bg-blue-500 text-white"
                           : "bg-gray-300 hover:bg-blue-300"
                       }`}
@@ -57,8 +102,6 @@ function OrderPage() {
             </div>
           ))}
         </div>
-
-        {/* Label angka kolom  */}
         <div className="grid grid-cols-7 gap-[27px] mt-2">
           {cols.map((num) => (
             <div key={num} className="text-center text-sm gap-20">
@@ -68,6 +111,17 @@ function OrderPage() {
         </div>
       </div>
     );
+  };
+
+  const selectedCinemaLogo = cinemaLogos.find(
+    (c) => c.name.toLowerCase() === cinemaName?.toLowerCase()
+  )?.svg;
+
+  const handleProceed = () => {
+    if (selectedSeats.length === 0) {
+      return;
+    }
+    navigate("/ticketing/movies/payment");
   };
 
   return (
@@ -211,8 +265,10 @@ function OrderPage() {
           <aside>
             <div className="bg-white p-[30px] rounded-[10px] w-[450px]">
               <div className="flex flex-col items-center leanding-[5px] gap-3">
-                <img src={cinema} alt="cinema logo" />
-                <p className="text-[24px]">CineOne21 Cinema</p>
+                <div className="h-12 w-28 flex items-center justify-center">
+                  {selectedCinemaLogo}
+                </div>
+                <p className="text-[24px]">{cinemaName} Cinema</p>
               </div>
 
               <dl className="my-[25px] flex flex-col gap-3">
@@ -228,7 +284,7 @@ function OrderPage() {
 
                 <div className="flex justify-between text-[14px]">
                   <dt>One ticket price</dt>
-                  <dd>$10</dd>
+                  <dd>Rp {cinemaPrice.toLocaleString("id-ID")}</dd>
                 </div>
 
                 <div className="flex justify-between text-[14px]">
@@ -245,11 +301,16 @@ function OrderPage() {
 
               <dl className="flex justify-between text-[20px]">
                 <dt>Total Payment</dt>
-                <dd className="text-[var(--color--primary)]">${totalPrice}</dd>
+                <dd className="text-[var(--color--primary)]">
+                  Rp {totalPrice.toLocaleString("id-ID")}
+                </dd>
               </dl>
             </div>
-            <div className="bg-[var(--color--primary)] text-white my-[20px] py-[10px] px-[20px] rounded-[7px] mb-10 text-center">
-              <Link to="/ticketing/movies/payment">Checkout Now</Link>
+            <div
+              onClick={handleProceed}
+              className="bg-[var(--color--primary)] text-white my-[20px] py-[10px] px-[20px] rounded-[7px] mb-10 text-center cursor-pointer"
+            >
+              Checkout Now
             </div>
           </aside>
         </div>
