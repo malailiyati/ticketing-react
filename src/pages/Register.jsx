@@ -151,7 +151,7 @@ function Register() {
                     onChange={onChangeHandler}
                   />
                   <img
-                    src={showPassword ? eyeSlash : eyeSolid}
+                    src={showPassword ? eyeSolid : eyeSlash}
                     width="20"
                     height="20"
                     alt="eye"
