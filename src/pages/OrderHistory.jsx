@@ -1,13 +1,15 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import InfoAccount from "../components/InfoAccount";
 import AccountSetting from "../components/AccountSetting";
 // import { useSelector } from "react-redux";
 import barcode from "../assets/barcode.png";
-import { historyContext } from "../context/ticket/historyContext";
+// import { historyContext } from "../context/ticket/historyContext";
+import { useSelector } from "react-redux";
 
 function OrderHistory() {
-  const { history } = useContext(historyContext);
+  const [history, setHistory] = useState([]);
   const [showDetails, setShowDetails] = useState([]);
+  const { token } = useSelector((state) => state.auth);
 
   const toggleDetails = (index) => {
     if (showDetails.includes(index)) {
@@ -16,6 +18,48 @@ function OrderHistory() {
       setShowDetails([...showDetails, index]);
     }
   };
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_BE_HOST}/user/history`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error("Failed to fetch history");
+        const data = await res.json();
+
+        // kalau response array langsung
+        const historyData = Array.isArray(data) ? data : data.data || [];
+
+        setHistory(
+          historyData.map((item) => ({
+            movieTitle: item.movie_title,
+            shortMovieTitle: item.movie_title
+              ? item.movie_title.split(" ").slice(0, 2).join(" ") + "..." // ambil 2 kata pertama
+              : "",
+            selectedDate: item.date ? item.date.split("T")[0] : "",
+            selectedTime: item.time,
+            selectedSeats: item.seats ? item.seats.split(",") : [],
+            totalPrice: item.total_price,
+            numberOfTicket: item.seats ? item.seats.split(",").length : 0,
+            cinemaName: item.cinema_name,
+            isPaid: item.is_paid,
+          }))
+        );
+      } catch (err) {
+        console.error("Error fetch order history:", err);
+      }
+    };
+
+    fetchHistory(); // cuma fetch kalau ada token
+  }, [token]);
+
   return (
     <main className="bg-[#a0a3bd33] p-25">
       <div className="flex gap-10 flex-col md:flex-row">
@@ -27,7 +71,7 @@ function OrderHistory() {
           <AccountSetting />
 
           {history.map((order, index) => (
-            <div>
+            <div key={index}>
               <div className="px-5 py-3 bg-white rounded-[20px] mt-15">
                 <div className="flex justify-between items-center border-b border-[var(--color--secundery)] w-ful">
                   <div className="mb-8 gap-5">
@@ -59,8 +103,14 @@ function OrderHistory() {
                     <p className="bg-gray-100 px-8 py-2 rounded-lg text-gray-700">
                       Ticket used
                     </p>
-                    <p className="bg-blue-100 px-8 py-2 rounded-lg text-blue-700">
-                      Paid
+                    <p
+                      className={`px-8 py-2 rounded-lg ${
+                        order.isPaid
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {order.isPaid ? "Paid" : "Unpaid"}
                     </p>
                   </div>
                   <div className="flex justify-center items-center text-[var(--color--secundery)]">
@@ -123,7 +173,7 @@ function OrderHistory() {
                                 Movie
                               </dt>
                               <dd className="text-[16px]">
-                                {order.movieTitle}
+                                {order.shortMovieTitle}
                               </dd>
                             </div>
                           </dl>
@@ -154,8 +204,8 @@ function OrderHistory() {
                               <dt className="text-[14px] text-[var(--color--secundery)] font-[500]">
                                 seats
                               </dt>
-                              <dd className="text-[16px] flex gap-4 flex-wrap">
-                                {order.selectedSeats}
+                              <dd className="text-[14px] flex gap-4 mb-8 flex-wrap">
+                                {order.selectedSeats.join(",")}
                               </dd>
                             </div>
                             <div>
@@ -173,7 +223,9 @@ function OrderHistory() {
                       <div className="flex justify-center items-center">
                         <dl>
                           <dt>Total</dt>
-                          <dd className="font-bold">${order.totalPrice}</dd>
+                          <dd className="font-bold">
+                            Rp{order.totalPrice.toLocaleString("id-ID")}
+                          </dd>
                         </dl>
                       </div>
                     </div>
