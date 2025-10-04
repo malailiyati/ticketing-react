@@ -10,8 +10,6 @@ function ResetPwd() {
   const [form, setForm] = useState({ newPassword: "", confirmPassword: "" });
   const [err, setErr] = useState({ newPassword: "", confirmPassword: "" });
   const emailTarget = localStorage.getItem("targetEmail");
-  //   const [_, setData] = useState();
-  console.log("email", emailTarget);
   const { users, setUsers } = useContext(authContext);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
