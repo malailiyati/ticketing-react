@@ -1,133 +1,227 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router";
 
 function AddMovie() {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    title: "",
+    synopsis: "",
+    release_date: "",
+    hour: "",
+    minute: "",
+    director_id: "", // langsung ID
+    genres: "", // contoh input: "1,2,3"
+    casts: "", // contoh input: "5,7"
+  });
+
+  const [poster, setPoster] = useState(null);
+  const [bgPoster, setBgPoster] = useState(null);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  // Handle input
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle file
+  const handleFileChange = (e, type) => {
+    if (type === "poster") setPoster(e.target.files[0]);
+    if (type === "bgPoster") setBgPoster(e.target.files[0]);
+  };
+
+  // Submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (
+      !form.title ||
+      !form.synopsis ||
+      !form.release_date ||
+      !form.director_id
+    ) {
+      setError("Harap lengkapi semua field wajib ❌");
+      return;
+    }
+
+    try {
+      setError("");
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+
+      formData.append("title", form.title);
+      formData.append("synopsis", form.synopsis);
+      formData.append("release_date", form.release_date);
+
+      // Duration HH:MM:SS
+      const hh = String(form.hour || 0).padStart(2, "0");
+      const mm = String(form.minute || 0).padStart(2, "0");
+      formData.append("duration", `${hh}:${mm}:00`);
+
+      // Langsung pakai ID
+      formData.append("director_id", form.director_id);
+
+      // Genres (split jadi array ID)
+      form.genres
+        .split(",")
+        .map((g) => g.trim())
+        .forEach((gid) => {
+          if (gid) formData.append("genres", gid);
+        });
+
+      // Casts (split jadi array ID)
+      form.casts
+        .split(",")
+        .map((c) => c.trim())
+        .forEach((cid) => {
+          if (cid) formData.append("casts", cid);
+        });
+
+      if (poster) formData.append("poster", poster);
+      if (bgPoster) formData.append("background_poster", bgPoster);
+
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      const res = await fetch(`${import.meta.env.VITE_BE_HOST}/admin/movies`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Gagal tambah movie ❌");
+
+      setMessage("Movie berhasil ditambahkan");
+      setTimeout(() => navigate("/ticketing/movieAdmin"), 2000);
+    } catch (err) {
+      setError(err.message || "Error tambah movie");
+    }
+  };
+
   return (
     <main className="bg-[#a0a3bd33] p-25">
       <div className="bg-white p-6 rounded shadow-md mx-auto w-full md:w-2/3">
-        <h1 className="font-bold mb-2 text-[20px]">Add New Movie</h1>
-        <p className="text-gray-500 ">Upload Image</p>
-        <button className="text-white bg-[var(--color--primary)] py-1 px-3 rounded my-1 cursor-pointer">
-          Upload
-        </button>
+        <h1 className="font-bold mb-4 text-[20px]">Add New Movie</h1>
 
-        <form className="py-3">
-          <div>
-            <label htmlFor="movieName">Movie Name</label>
+        {message && (
+          <div className="mb-4 p-3 rounded bg-green-100 text-green-700">
+            {message}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 p-3 rounded bg-red-100 text-red-700">
+            {error}
+          </div>
+        )}
+
+        <form className="py-3" onSubmit={handleSubmit}>
+          <label>Movie Name *</label>
+          <input
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            className="border p-2 w-full mb-3 rounded"
+          />
+
+          <label>Synopsis *</label>
+          <textarea
+            name="synopsis"
+            value={form.synopsis}
+            onChange={handleChange}
+            className="border p-2 w-full mb-3 rounded h-24"
+          />
+
+          <label>Release Date *</label>
+          <input
+            type="date"
+            name="release_date"
+            value={form.release_date}
+            onChange={handleChange}
+            className="border p-2 w-full mb-3 rounded"
+          />
+
+          <label>Duration (hour/minute) *</label>
+          <label>Duration (hour/minute) *</label>
+          <div className="flex gap-3 mb-3">
             <input
-              type="text"
-              id="movieName"
-              name="movieName"
-              placeholder="Spider-Man:Homecoming"
-              className="bg-gray-50 border border-gray-400 py-2 px-5 rounded w-full mt-2"
+              type="number"
+              name="hour"
+              value={form.hour}
+              onChange={handleChange}
+              placeholder="2"
+              min="0"
+              max="23"
+              className="border p-2 rounded w-1/2"
+            />
+            <input
+              type="number"
+              name="minute"
+              value={form.minute}
+              onChange={handleChange}
+              placeholder="13"
+              min="0"
+              max="59"
+              className="border p-2 rounded w-1/2"
             />
           </div>
 
-          <div className="my-5">
-            <label htmlFor="category">Category</label>
+          <label>Director ID *</label>
+          <input
+            type="number"
+            name="director_id"
+            value={form.director_id}
+            onChange={handleChange}
+            placeholder="1"
+            className="border p-2 w-full mb-3 rounded"
+          />
+
+          <label>Genres (IDs, comma separated)</label>
+          <input
+            type="text"
+            name="genres"
+            value={form.genres}
+            onChange={handleChange}
+            placeholder="1,2,3"
+            className="border p-2 w-full mb-3 rounded"
+          />
+
+          <label>Casts (IDs, comma separated)</label>
+          <input
+            type="text"
+            name="casts"
+            value={form.casts}
+            onChange={handleChange}
+            placeholder="5,7"
+            className="border p-2 w-full mb-3 rounded"
+          />
+
+          <div className="flex flex-col">
+            <label>Poster *</label>
             <input
-              type="text"
-              id="category"
-              name="category"
-              placeholder="Action, Adventure, Sci-Fi"
-              className="bg-gray-50 border border-gray-400 py-2 px-5 rounded w-full mt-2"
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFileChange(e, "poster")}
+              className="mb-3"
+            />
+
+            <label>Background Poster</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFileChange(e, "bgPoster")}
+              className="mb-3"
             />
           </div>
 
-          <div className="flex justify-between gap-10">
-            <div>
-              <label htmlFor="relesedate">Relase date</label>
-              <input
-                type="text"
-                id="releseDate"
-                name="relesedate"
-                placeholder="07/05/2020"
-                className="bg-gray-50 border border-gray-400 py-2 px-5 rounded w-full mt-2"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="hour">Duration(hour/minute)</label>
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  id="hour"
-                  name="hour"
-                  placeholder="2"
-                  className="bg-gray-50 border border-gray-400 py-2 px-5 rounded w-full mt-2"
-                />
-                <input
-                  type="text"
-                  id="minute"
-                  name="minute"
-                  placeholder="13"
-                  className="bg-gray-50 border border-gray-400 py-2 px-5 rounded w-full mt-2"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="my-5">
-            <label htmlFor="directorName">Director Name</label>
-            <input
-              type="text"
-              id="directorName"
-              name="directoreName"
-              placeholder="Jon Watts"
-              className="bg-gray-50 border border-gray-400 py-2 px-5 rounded w-full mt-2"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="cast">Cast</label>
-            <input
-              type="text"
-              id="cast"
-              name="cast"
-              placeholder="Tom Holland, Michael Keaton, Robert Dow.."
-              className="bg-gray-50 border border-gray-400 py-2 px-5 rounded w-full mt-2"
-            />
-          </div>
-
-          <div className="my-5">
-            <label htmlFor="synopsis">Synopsis</label>
-
-            <textarea
-              name="synopsis"
-              id="synopsis"
-              className="bg-gray-50 border border-gray-400 py-2 px-5 rounded w-full mt-2 h-50"
-              placeholder="Thrilled by his experience with the Avengers, Peter returns home, where he lives with his Aunt May, |"
-            ></textarea>
-          </div>
-
-          <div>
-            <label htmlFor="location">Add Location</label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              placeholder="Purwokerto, Bandung, Bekasi"
-              className="bg-gray-50 border border-gray-400 py-2 px-5 rounded w-full mt-2"
-            />
-          </div>
-
-          <div className="my-5">
-            <label htmlFor="date">Set Date & Time</label> <br />
-            <input
-              type="date"
-              id="date"
-              name="date"
-              className="bg-gray-50 border border-gray-400 py-2 px-5 rounded mt-2 mb-4"
-            />
-            <div className="flex gap-5 items-center">
-              <p className="text-[var(--color--primary)] border border-[var(--color--primary)] rounded py-1 px-3">
-                +
-              </p>
-              <p>08:30am</p>
-              <p>10:30pm</p>
-            </div>
-          </div>
-
-          <button className="bg-[var(--color--primary)] text-white py-1 w-full text-center rounded cursor-pointer">
+          <button
+            type="submit"
+            className="bg-[var(--color--primary)] text-white py-2 w-full rounded cursor-pointer"
+          >
             Save Movie
           </button>
         </form>
