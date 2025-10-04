@@ -27,6 +27,7 @@ import MovieAdmin from "./pages/MovieAdmin.jsx";
 import AddMovie from "./pages/AddMovie.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
+import EditMovie from "./pages/EditMovie.jsx";
 
 function Router() {
   return (
@@ -105,6 +106,14 @@ function Router() {
               element={
                 <AdminRoute>
                   <AddMovie />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="editMovie/:id"
+              element={
+                <AdminRoute>
+                  <EditMovie />
                 </AdminRoute>
               }
             />
