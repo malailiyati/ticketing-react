@@ -8,7 +8,7 @@ RUN npm ci
 
 COPY . .
 
-ARG VITE_BE_HOST=http://localhost/api
+ARG VITE_BE_HOST=/api
 ENV VITE_BE_HOST=$VITE_BE_HOST
 
 RUN npm run build
