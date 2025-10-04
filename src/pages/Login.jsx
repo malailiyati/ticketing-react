@@ -17,8 +17,15 @@ function Login() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/ticketing/content");
+    const role = localStorage.getItem("role");
+
+    if (token && role) {
+      // Redirect berdasarkan role
+      if (role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/ticketing/content");
+      }
     }
   }, [navigate]);
 
@@ -36,7 +43,7 @@ function Login() {
     let valid = true;
     const newErr = { email: "", password: "" };
 
-    //validasi email
+    // Validasi email
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
       newErr.email = "email tidak boleh kosong";
@@ -46,21 +53,21 @@ function Login() {
       valid = false;
     }
 
-    //validasi password
+    // Validasi password
     const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/;
     if (!password) {
       newErr.password = "password tidak boleh kosong";
       valid = false;
     } else if (!passwordPattern.test(password)) {
       newErr.password =
-        "password minimal 8 karakter,mengandung minimal 1 huruf besar, 1 huruf kecil dan 1 karakter spesial(!@#$%^&*><";
+        "password minimal 8 karakter, mengandung minimal 1 huruf besar, 1 huruf kecil dan 1 karakter spesial(!@#$%^&*><)";
       valid = false;
     }
+
     setErr(newErr);
     if (!valid) return;
 
     try {
-      // Fetch ke backend
       const res = await fetch(`${import.meta.env.VITE_BE_HOST}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,30 +80,37 @@ function Login() {
       }
 
       const data = await res.json();
-
-      // token langsung ada di root
       const token = data.token;
 
       if (!token) {
         throw new Error("Token tidak ditemukan di response backend");
       }
 
-      // simpan token ke localStorage
+      // Simpan token dan role ke localStorage
       localStorage.setItem("token", token);
+      localStorage.setItem("role", data.role);
 
-      // simpan ke redux
+      // Simpan ke redux
       dispatch(
         login({
           token,
           user: {
-            email,
-            role: data.role, // dari form input
+            id: data.user?.id,
+            email: data.user?.email || email,
+            firstName: data.user?.first_name || "",
+            lastName: data.user?.last_name || "",
+            phone: data.user?.phone || "",
+            role: data.role,
           },
         })
       );
 
-      // redirect
-      navigate("/ticketing/content");
+      // Redirect berdasarkan role
+      if (data.role === "admin") {
+        navigate("/ticketing/movieAdmin");
+      } else {
+        navigate("/ticketing/content");
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -155,7 +169,7 @@ function Login() {
                     onChange={onChangeHandler}
                   />
                   <img
-                    src={showPassword ? eyeSlash : eyeSolid}
+                    src={showPassword ? eyeSolid : eyeSlash}
                     width="20"
                     height="20"
                     alt="eye"
