@@ -34,9 +34,7 @@ function useMoviesList({ page, limit, title, genre, endpoint = "/movie" }) {
         const cleanEndpoint = endpoint.startsWith("/")
           ? endpoint
           : `/${endpoint}`;
-        const url = `${
-          import.meta.env.VITE_BE_HOST
-        }${cleanEndpoint}?${params.toString()}`;
+        const url = `${cleanEndpoint}?${params.toString()}`;
 
         const res = await fetch(url, { signal: controller.signal });
         if (!res.ok) throw new Error("Gagal fetch movies");

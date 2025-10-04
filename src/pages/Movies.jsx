@@ -50,7 +50,7 @@ function Movies() {
   const getPosterUrl = (poster) => {
     if (!poster) return "https://via.placeholder.com/300x450?text=No+Image";
     if (poster.startsWith("http")) return poster;
-    return `${import.meta.env.VITE_BE_HOST}/img/${poster}`;
+    return `/img/${poster}`;
   };
   return (
     <main>
