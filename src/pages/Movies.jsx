@@ -1,11 +1,17 @@
-import React, { useState } from "react";
-import { Link } from "react-router";
+import React, { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import useMoviesList from "../hooks/MoviesList";
 
 function Movies() {
-  const [page, setPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // ambil nilai awal dari query param
+  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("title") || "");
+  const [selectedGenres, setSelectedGenres] = useState(
+    searchParams.get("genre") ? searchParams.get("genre").split(",") : []
+  );
+
   const totalPages = 4;
   const { movies, genres, loading, error } = useMoviesList({
     page,
@@ -15,7 +21,16 @@ function Movies() {
     endpoint: "/movie",
   });
 
-  // Handler untuk klik filter genre
+  // setiap kali state berubah → update query param di browser
+  useEffect(() => {
+    const params = {};
+    if (page) params.page = page;
+    if (searchTerm) params.title = searchTerm;
+    if (selectedGenres.length > 0) params.genre = selectedGenres.join(",");
+    setSearchParams(params);
+  }, [page, searchTerm, selectedGenres, setSearchParams]);
+
+  // Handler klik filter genre
   const toggleGenre = (genreName) => {
     setSelectedGenres((prev) => {
       if (prev.includes(genreName)) {
@@ -24,21 +39,18 @@ function Movies() {
         return [...prev, genreName];
       }
     });
-    setPage(1);
+    setPage(1); // reset page ke 1
   };
-  const getPosterUrl = (poster) => {
-    if (!poster) return "https://via.placeholder.com/300x450?text=No+Image";
 
-    if (poster.startsWith("http")) {
-      return poster; // URL dari TMDB
-    }
-
-    return `${import.meta.env.VITE_BE_HOST}/img/${poster}`; // path dari backend local
-  };
-  // Handler untuk input search
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setPage(1); // reset page ke 1 saat search berubah
+    setPage(1);
+  };
+
+  const getPosterUrl = (poster) => {
+    if (!poster) return "https://via.placeholder.com/300x450?text=No+Image";
+    if (poster.startsWith("http")) return poster;
+    return `${import.meta.env.VITE_BE_HOST}/img/${poster}`;
   };
   return (
     <main>
@@ -110,7 +122,7 @@ function Movies() {
                   <img
                     src={getPosterUrl(movie.poster)}
                     alt={movie.title}
-                    className="w-full min-h-[350px] object-cover rounded-[8px]"
+                    className="w-full h-[450px] object-cover object-center rounded-[8px]"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out rounded-[8px]">
                     <Link
