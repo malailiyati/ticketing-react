@@ -6,7 +6,6 @@ function useMoviesList({ page, limit, title, genre, endpoint = "/movie" }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // simpan state sudah pernah ambil genre fix belum
   const hasLockedGenres = useRef(false);
 
   useEffect(() => {
@@ -17,21 +16,22 @@ function useMoviesList({ page, limit, title, genre, endpoint = "/movie" }) {
       setError(null);
 
       try {
-        // gabung genres array → string
+        // gabung genres array → string query param
         let genreParam = "";
         if (Array.isArray(genre) && genre.length > 0) {
-          genreParam = genre.join(","); // "Action,Drama"
+          genreParam = genre.join(","); // contoh: "Action,Drama"
         } else if (typeof genre === "string") {
           genreParam = genre;
         }
 
+        // build query param
         const params = new URLSearchParams();
         if (page !== undefined) params.append("page", page);
         if (limit) params.append("limit", limit);
         if (title) params.append("title", title);
-        if (genre) params.append("genre", genreParam);
+        if (genreParam) params.append("genre", genreParam);
 
-        let cleanEndpoint = endpoint.startsWith("/")
+        const cleanEndpoint = endpoint.startsWith("/")
           ? endpoint
           : `/${endpoint}`;
         const url = `${
@@ -39,7 +39,6 @@ function useMoviesList({ page, limit, title, genre, endpoint = "/movie" }) {
         }${cleanEndpoint}?${params.toString()}`;
 
         const res = await fetch(url, { signal: controller.signal });
-
         if (!res.ok) throw new Error("Gagal fetch movies");
 
         const data = await res.json();
@@ -50,25 +49,21 @@ function useMoviesList({ page, limit, title, genre, endpoint = "/movie" }) {
         if (!hasLockedGenres.current) {
           let allGenres = [];
           if (data.genres) {
-            // kalau backend sudah kirim data.genres (array)
-            allGenres = data.genres;
+            allGenres = data.genres; // langsung dari backend
           } else {
-            // fallback: ambil genre unik dari data.data
+            // fallback: kumpulin genre unik dari movie
             const temp = new Set();
             data.data?.forEach((movie) => {
               if (Array.isArray(movie.genres)) {
                 movie.genres.forEach((g) => temp.add(g));
               } else if (typeof movie.genres === "string") {
-                movie.genres
-                  .split(",")
-                  .map((g) => g.trim())
-                  .forEach((g) => temp.add(g));
+                movie.genres.split(",").forEach((g) => temp.add(g.trim()));
               }
             });
             allGenres = Array.from(temp);
           }
           setGenres(allGenres);
-          hasLockedGenres.current = true; // kunci supaya tidak berubah lagi
+          hasLockedGenres.current = true; // supaya tidak diubah lagi
         }
       } catch (err) {
         if (err.name !== "AbortError") {
