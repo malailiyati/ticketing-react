@@ -13,3 +13,14 @@
       url("../assets/bg.png");
   }
 }
+
+/* Hilangkan mata bawaan di Chrome, Edge, Safari */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-textfield-decoration-container,
+input[type="password"]::-webkit-clear-button,
+input[type="password"]::-webkit-inner-spin-button,
+input[type="password"]::-webkit-outer-spin-button {
+  display: none !important;
+  appearance: none;
+}
