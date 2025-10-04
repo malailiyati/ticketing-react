@@ -2,15 +2,24 @@ import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
 function ProtectedRoute({ children }) {
-  // ambil token dari redux
-  const token = useSelector((state) => state.auth.token);
+  const { token, user } = useSelector((state) => state.auth);
 
-  if (!token) {
-    // kalau tidak ada token → redirect ke /login
+  // Fallback ke localStorage
+  const tokenFromStorage = localStorage.getItem("token");
+  const roleFromStorage = localStorage.getItem("role");
+
+  const currentToken = token || tokenFromStorage;
+  const currentRole = user?.role || roleFromStorage;
+
+  if (!currentToken) {
     return <Navigate to="/login" replace />;
   }
 
-  // kalau ada token → render children (halaman yang dilindungi)
+  // Admin tidak boleh akses route user
+  if (currentRole === "admin") {
+    return <Navigate to="/ticketing/admin" replace />;
+  }
+
   return children;
 }
 
